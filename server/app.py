@@ -18,6 +18,42 @@ db.init_app(app)
 
 api = Api(app)
 
+
+# log in
+class Login(Resource):
+    def post(self):
+        user = User.query.filter( User.username == request.get_json()['username']).first()
+
+        session['user_id']=user.id
+        return make_response(user.to_dict(), 200)
+
+
+        
+api.add_resource(Login, '/login')
+
+# log out
+class Logout(Resource):
+    def delete(self):
+
+        session['user_id']= None
+        return make_response({"messege":"204:no data"}, 204)
+
+
+        
+api.add_resource(Logout, '/logout')
+
+# kept loggedin
+class CheckSession(Resource):
+    def get(self):
+        user_id = session.get('user_id')
+
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+            return make_response(user.to_dict(), 200)
+        return {}, 401
+       
+api.add_resource(CheckSession, '/check_session')
+
 class ClearSession(Resource):
 
     def delete(self):
